@@ -1,6 +1,7 @@
 [package]
 name = "rppg"
 version = "0.1.0"
+authors = ["Bhargav Acharya <bacharya@techfak.uni-bielefeld.de>"]
 edition = "2021"
 
 [dependencies]
