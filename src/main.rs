@@ -1,7 +1,6 @@
 use rppg::Config;
 use std::env;
 use std::process;
-use opencv::prelude::MatTraitConst;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
