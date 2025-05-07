@@ -1,5 +1,4 @@
 pub trait RppgAlgorithm {
     fn name(&self) -> &'static str;
-    fn process(&self, frames: &Vec<opencv::core::Mat>, buffer: &mut Vec<f32>);
+    fn process(&self, frames: &Vec<opencv::core::Mat>, buffer: &mut Vec<f64>);
 }
-

@@ -7,7 +7,7 @@ impl RppgAlgorithm for Chrom {
         "CHROM"
     }
 
-    fn process(&self, frames: &Vec<opencv::core::Mat>, buffer: &mut Vec<f32>) {
+    fn process(&self, frames: &Vec<opencv::core::Mat>, buffer: &mut Vec<f64>) {
         // Dummy logic
     }
 }

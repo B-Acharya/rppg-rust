@@ -7,7 +7,7 @@ impl RppgAlgorithm for Pos {
         "CHROM"
     }
 
-    fn process(&self, frames: &Vec<opencv::core::Mat>, buffer: &mut Vec<f32>) {
+    fn process(&self, frames: &Vec<opencv::core::Mat>, buffer: &mut Vec<f64>) {
         // Dummy logic
         vec![1.0; frames.len()];
         buffer.push(0.0);
