@@ -10,22 +10,26 @@ impl RppgAlgorithm for Green {
     }
 
     fn process(&self, frames: &Vec<opencv::core::Mat>, buffer: &mut Vec<f64>) {
-        let mut i = 0;
-        for frame in frames {
-            let dummy_mask = opencv::core::no_array();
-
-            match opencv::core::mean(&frame, &dummy_mask) {
+        let dummy_mask = opencv::core::no_array();
+        let dummy: Vec<f64> = frames
+            .iter()
+            .map(|frame| match opencv::core::mean(&frame, &dummy_mask) {
                 Ok(mean) => {
                     //is this event the green channel BGR format
-                    buffer[i] = mean[1];
-                    i += 1;
+                    mean[1]
                 }
                 Err(e) => {
-                    eprintln!("Failed to calcualte the mean in GREEN {}", e);
-                    break;
+                    eprintln!(
+                        "Failed to calcualte the mean GREEN setting green value to zero{}",
+                        e
+                    );
+                    0.0
                 }
-            }
-        }
+            })
+            .collect();
+
+        buffer.clear();
+        buffer.extend(dummy);
     }
 }
 
