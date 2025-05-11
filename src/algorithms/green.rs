@@ -1,6 +1,5 @@
-use opencv::core::MatTraitConst;
-
 use super::traits::RppgAlgorithm;
+use super::utils::filterSignal;
 
 pub struct Green;
 
@@ -29,7 +28,12 @@ impl RppgAlgorithm for Green {
             .collect();
 
         buffer.clear();
-        buffer.extend(dummy);
+        buffer.extend(dummy.clone());
+
+        let signaltofilter = dummy.clone();
+
+        //TODO: replace fps with accurate number
+        //let filtered_singal = filterSignal(signaltofilter, 25.0);
     }
 }
 

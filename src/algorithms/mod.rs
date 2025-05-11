@@ -2,6 +2,7 @@ mod chrom;
 mod green;
 mod pos;
 mod traits;
+mod utils;
 
 pub use chrom::Chrom;
 pub use green::Green;
@@ -16,4 +17,3 @@ pub fn get_algorithm(name: &str) -> Box<dyn RppgAlgorithm> {
         _ => panic!("Unknown algorithm: {}", name),
     }
 }
-
