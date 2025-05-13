@@ -8,7 +8,13 @@ impl RppgAlgorithm for Green {
         "green"
     }
 
-    fn process(&self, frames: &Vec<opencv::core::Mat>, buffer: &mut Vec<f64>) {
+    fn process(
+        &self,
+        frames: &Vec<opencv::core::Mat>,
+        buffer: &mut Vec<f64>,
+        fps: f64,
+        filter_singal: bool,
+    ) {
         let dummy_mask = opencv::core::no_array();
         let dummy: Vec<f64> = frames
             .iter()
@@ -28,12 +34,13 @@ impl RppgAlgorithm for Green {
             .collect();
 
         buffer.clear();
-        buffer.extend(dummy.clone());
 
-        let signaltofilter = dummy.clone();
-
-        //TODO: replace fps with accurate number
-        //let filtered_singal = filterSignal(signaltofilter, 25.0);
+        if filter_singal {
+            let filtered_singal = filterSignal(dummy, fps);
+            buffer.extend(filtered_singal);
+        } else {
+            buffer.extend(dummy);
+        }
     }
 }
 
@@ -52,7 +59,7 @@ mod tests {
         let green_algorithm = Green;
         let frames = vec![];
         let mut buffer = vec![];
-        green_algorithm.process(&frames, &mut buffer);
+        green_algorithm.process(&frames, &mut buffer, 25.0, true);
         assert_eq!(buffer.len(), 0);
     }
 
@@ -71,10 +78,12 @@ mod tests {
         )
         .unwrap();
 
+        let fps = 25.0;
+
         let frames = vec![frame];
         let mut buffer = vec![0.0; frames.len()]; // Initialize buffer with the correct size
 
-        green_algorithm.process(&frames, &mut buffer);
+        green_algorithm.process(&frames, &mut buffer, fps, false);
 
         assert_eq!(buffer.len(), 1);
         assert_eq!(buffer[0], 255.0, "Expected mean green value to be 255.0");

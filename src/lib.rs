@@ -13,12 +13,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         process::exit(1);
     });
 
-    let frame_length = frames.len();
+    let frame_length = frames.0.len();
     let mut signal_buffer: Vec<f64> = vec![0.0; frame_length];
+    let filter_signal = true;
 
     // how should you design this function ? It should pass botha mutalable reference so that
     // there's less data that is transfered to the funciton, but then what should be returend ?
-    rppgalgorithm.process(&frames, &mut signal_buffer);
+    rppgalgorithm.process(&frames.0, &mut signal_buffer, frames.1, filter_signal);
 
     println! {"{}",frame_length};
     println! {"{:?}",signal_buffer};

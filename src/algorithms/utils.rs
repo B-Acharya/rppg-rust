@@ -16,6 +16,7 @@ pub fn filterSignal(signal: Vec<f64>, f0: f64) -> Vec<f64> {
 
     println!("{}", f0);
 
+    //TODO: Can I use a cascaded filter, how ill it affect my singal
     let coeffs1 = Coefficients::<f64>::band_0db_from_cutting_frequencies(
         Type::BandPass,
         f_low_normalize,
@@ -25,6 +26,7 @@ pub fn filterSignal(signal: Vec<f64>, f0: f64) -> Vec<f64> {
 
     println!("{:?}", coeffs1);
 
+    //TODO: Which form should I use ?
     let mut stage1 = DirectForm1::<f64>::new(coeffs1);
 
     signal.iter().map(|element| stage1.run(*element)).collect()

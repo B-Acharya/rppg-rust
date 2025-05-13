@@ -1,7 +1,7 @@
 use opencv::prelude::*;
 use opencv::videoio::{VideoCapture, CAP_ANY};
 
-pub fn get_frames(path: &str) -> opencv::Result<Vec<Mat>, String> {
+pub fn get_frames(path: &str) -> opencv::Result<(Vec<Mat>, f64), String> {
     let mut frames: Vec<Mat> = Vec::new();
 
     //TODO: Change the capture methods if no path is provided and use the webcam as an input to
@@ -32,5 +32,7 @@ pub fn get_frames(path: &str) -> opencv::Result<Vec<Mat>, String> {
             }
         }
     }
-    Ok(frames)
+
+    let fps = cam.get(opencv::videoio::CAP_PROP_FPS).unwrap();
+    Ok((frames, fps))
 }
