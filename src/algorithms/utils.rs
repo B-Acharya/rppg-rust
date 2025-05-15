@@ -34,7 +34,7 @@ pub fn filterSignal(signal: Vec<f64>, f0: f64) -> Vec<f64> {
     signal.iter().map(|element| stage1.run(*element)).collect()
 }
 
-pub fn extract_hr_fft(signal: Vec<f64>, sampling_rate: f64) -> f64 {
+pub fn extract_hr_fft(signal: &mut Vec<f64>, sampling_rate: f64) -> f64 {
     let n = signal.len();
     let mut signal_complex: Vec<Complex<f64>> =
         signal.iter().map(|&x| Complex::new(x, 0.0)).collect();
@@ -166,8 +166,8 @@ mod tests {
     fn test_fft_sine_response_4hz() {
         let sample_rate: f64 = 25.0;
         let frequency: f64 = 4.0;
-        let sine = sine_wave(frequency, sample_rate, 100);
-        let output = extract_hr_fft(sine, sample_rate);
+        let mut sine = sine_wave(frequency, sample_rate, 100);
+        let output = extract_hr_fft(&mut sine, sample_rate);
 
         // Simple energy check
         println!("Freq {}", output);

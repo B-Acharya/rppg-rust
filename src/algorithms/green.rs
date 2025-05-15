@@ -1,4 +1,5 @@
 use super::traits::RppgAlgorithm;
+use super::utils::extract_hr_fft;
 use super::utils::filterSignal;
 
 pub struct Green;
@@ -41,6 +42,17 @@ impl RppgAlgorithm for Green {
         } else {
             buffer.extend(dummy);
         }
+    }
+
+    fn extract_hr(
+        &self,
+        frames: &Vec<opencv::core::Mat>,
+        buffer: &mut Vec<f64>,
+        fps: f64,
+        filter_signal: bool,
+    ) -> f64 {
+        self.process(frames, buffer, fps, filter_signal);
+        extract_hr_fft(buffer, fps)
     }
 }
 
