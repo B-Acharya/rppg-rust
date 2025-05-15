@@ -37,7 +37,7 @@ impl RppgAlgorithm for Pos {
 
         for n_i in 0..n {
             let m = n_i - l;
-            if m >= 0 {
+            if m > 0 {
                 //normalize
 
                 let rbg_slice = &&rbg[m..n_i];
@@ -45,18 +45,15 @@ impl RppgAlgorithm for Pos {
 
                 let mut cn = Vec::new();
                 for x in rbg_slice.iter() {
-                    let r = x.0 as f64 / temporal_mean_channels.0 as f64;
-                    let g = x.1 as f64 / temporal_mean_channels.1 as f64;
-                    let b = x.2 as f64 / temporal_mean_channels.2 as f64;
+                    let r = x.0 / temporal_mean_channels.0;
+                    let g = x.1 / temporal_mean_channels.1;
+                    let b = x.2 / temporal_mean_channels.2;
 
                     cn.push((r, g, b))
                 }
 
-                let s1 = cn
-                    .iter()
-                    .map(|x| 0.0 as f64 + x.1 - 1.0 as f64 * x.2)
-                    .collect();
-                let s2 = cn.iter().map(|x| -2.0 as f64 * x.0 + x.1 + x.2).collect();
+                let s1 = cn.iter().map(|x| 0.0 + x.1 - 1.0 * x.2).collect();
+                let s2 = cn.iter().map(|x| -2.0 * x.0 + x.1 + x.2).collect();
 
                 let s1_std = std_deviation(&s1).unwrap();
                 let s2_std = std_deviation(&s2).unwrap();
@@ -77,9 +74,9 @@ impl RppgAlgorithm for Pos {
                 let h_mean = average(&h).unwrap();
 
                 for (i, val) in h.iter().enumerate() {
-                    let index = i + m as usize;
+                    let index = i + m;
                     H[index] = H[index] + (val - h_mean);
-                    if index > n_i as usize {
+                    if index > n_i {
                         println!("brr theres something wrong here")
                     }
                 }
