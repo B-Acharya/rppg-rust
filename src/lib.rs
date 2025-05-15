@@ -19,10 +19,12 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     // how should you design this function ? It should pass botha mutalable reference so that
     // there's less data that is transfered to the funciton, but then what should be returend ?
-    rppgalgorithm.process(&frames.0, &mut signal_buffer, frames.1, filter_signal);
+    //rppgalgorithm.process(&frames.0, &mut signal_buffer, frames.1, filter_signal);
+    let hr = rppgalgorithm.extract_hr(&frames.0, &mut signal_buffer, frames.1, filter_signal);
 
     println! {"{}",frame_length};
     println! {"{:?}",signal_buffer};
+    println! {"{:?}",hr };
 
     Ok(())
 }

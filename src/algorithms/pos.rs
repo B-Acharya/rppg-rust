@@ -24,8 +24,8 @@ impl RppgAlgorithm for Pos {
         for frame in frames.iter() {
             let mean = opencv::core::mean(&frame, &dummy_mask).unwrap();
             let b = mean[0];
-            let r = mean[0];
-            let g = mean[0];
+            let r = mean[1];
+            let g = mean[2];
             rbg.push((r, g, b));
         }
 
@@ -41,48 +41,47 @@ impl RppgAlgorithm for Pos {
                 continue;
             }
             let m = n_i - l;
-            if m >= 0 {
-                //normalize
+            //normalize
 
-                let rbg_slice = &&rbg[m..n_i];
-                let temporal_mean_channels = mean_rgb(rbg_slice);
+            let rbg_slice = &&rbg[m..n_i];
+            let temporal_mean_channels = mean_rgb(rbg_slice);
 
-                let mut cn = Vec::new();
-                for x in rbg_slice.iter() {
-                    let r = x.0 / temporal_mean_channels.0;
-                    let g = x.1 / temporal_mean_channels.1;
-                    let b = x.2 / temporal_mean_channels.2;
+            let mut cn = Vec::new();
+            for x in rbg_slice.iter() {
+                let r = x.0 / temporal_mean_channels.0;
+                let g = x.1 / temporal_mean_channels.1;
+                let b = x.2 / temporal_mean_channels.2;
 
-                    cn.push((r, g, b))
-                }
+                cn.push((r, g, b))
+            }
 
-                let s1 = cn.iter().map(|x| 0.0 + x.1 - 1.0 * x.2).collect();
-                let s2 = cn.iter().map(|x| -2.0 * x.0 + x.1 + x.2).collect();
+            let s1 = cn.iter().map(|x| x.1 - 1.0 * x.2).collect();
+            let s2 = cn.iter().map(|x| -2.0 * x.0 + x.1 + x.2).collect();
 
-                let s1_std = std_deviation(&s1).unwrap();
-                let s2_std = std_deviation(&s2).unwrap();
+            let s1_std = std_deviation(&s1).unwrap();
+            let s2_std = std_deviation(&s2).unwrap();
 
-                let ratio = s1_std as f64 / s2_std as f64;
+            let ratio = s1_std as f64 / s2_std as f64;
 
-                //let s1_s2_iter = std::iter::zip(s1, s2);
+            //let s1_s2_iter = std::iter::zip(s1, s2);
 
-                //let h = s1_s2_iter.map(|(s1_v, s2_v)| s1_v + ratio * s2_v).collect();
+            //let h = s1_s2_iter.map(|(s1_v, s2_v)| s1_v + ratio * s2_v).collect();
 
-                // is the above line equal to this ?
-                let mut h = Vec::new();
-                for index in 0..s1.len() {
-                    let value = s1[index] + ratio * s2[index];
-                    h.push(value);
-                }
+            // is the above line equal to this ?
+            let mut h = Vec::new();
+            for index in 0..s1.len() {
+                let value = s1[index] + ratio * s2[index];
+                h.push(value);
+            }
 
-                let h_mean = average(&h).unwrap();
+            let h_mean = average(&h).unwrap();
 
-                for (i, val) in h.iter().enumerate() {
-                    let index = i + m;
-                    H[index] = H[index] + (val - h_mean);
-                    if index > n_i {
-                        println!("brr theres something wrong here")
-                    }
+            for (i, val) in h.iter().enumerate() {
+                let index = i + m;
+                let value = H[index] + (val - h_mean);
+                H[index] = value;
+                if index > n_i {
+                    println!("brr theres something wrong here")
                 }
             }
         }
