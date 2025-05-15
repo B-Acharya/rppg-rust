@@ -33,12 +33,15 @@ impl RppgAlgorithm for Pos {
 
         let n = rbg.len();
 
-        let mut H = Vec::new();
+        let mut H: Vec<f64> = vec![0.0; n];
         let l = (WIN_SEC * fps).ceil() as usize;
 
         for n_i in 0..n {
+            if n_i < l {
+                continue;
+            }
             let m = n_i - l;
-            if m > 0 {
+            if m >= 0 {
                 //normalize
 
                 let rbg_slice = &&rbg[m..n_i];
