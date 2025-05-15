@@ -6,6 +6,7 @@ pub fn get_frames(path: &str) -> opencv::Result<(Vec<Mat>, f64), String> {
 
     //TODO: Change the capture methods if no path is provided and use the webcam as an input to
     //process the values
+    //TODO use video-rs https://github.com/oddity-ai/video-rs?tab=readme-ov-file
     let mut cam = VideoCapture::from_file(path, CAP_ANY).unwrap();
 
     if !cam.is_opened().unwrap() {

@@ -1,4 +1,6 @@
-use biquad::*;
+use biquad::Biquad;
+use biquad::{Coefficients, DirectForm1, Type};
+use rustfft::{num_complex::Complex, FftPlanner};
 
 pub fn filterSignal(signal: Vec<f64>, f0: f64) -> Vec<f64> {
     // Cutoff and sampling frequencies
@@ -30,6 +32,77 @@ pub fn filterSignal(signal: Vec<f64>, f0: f64) -> Vec<f64> {
     let mut stage1 = DirectForm1::<f64>::new(coeffs1);
 
     signal.iter().map(|element| stage1.run(*element)).collect()
+}
+
+pub fn extract_hr_fft(signal: Vec<f64>, sampling_rate: f64) -> f64 {
+    let n = signal.len();
+    let mut signal_complex: Vec<Complex<f64>> =
+        signal.iter().map(|&x| Complex::new(x, 0.0)).collect();
+
+    let mut planner = FftPlanner::new();
+    let fft = planner.plan_fft_forward(n);
+
+    fft.process(&mut signal_complex);
+
+    let max_index = signal_complex[..n / 2]
+        .iter()
+        .enumerate()
+        .map(|(i, c)| (i, c.norm_sqr()))
+        .max_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+        .map(|(i, _)| i)
+        .unwrap();
+
+    let freq_resolution = sampling_rate / n as f64;
+    max_index as f64 * freq_resolution
+}
+
+pub fn mean_rgb(rgb: &[(f64, f64, f64)]) -> (f64, f64, f64) {
+    let mut red = Vec::new();
+    let mut green = Vec::new();
+    let mut blue = Vec::new();
+    for vals in rgb {
+        red.push(vals.0);
+        green.push(vals.1);
+        blue.push(vals.2);
+    }
+
+    let red_mean = average(&red).unwrap();
+    let green_mean = average(&green).unwrap();
+    let blue_mean = average(&blue).unwrap();
+
+    (red_mean, green_mean, blue_mean)
+}
+
+/// Yo this this crazy to implement all the stats functions
+///https://rust-lang-nursery.github.io/rust-cookbook/science/mathematics/statistics.html
+pub fn average(nums: &Vec<f64>) -> Option<f64> {
+    let sum: f64 = nums.iter().sum();
+    let n = nums.len();
+
+    match n {
+        positive if positive > 0 => Some(sum / n as f64),
+        _ => None,
+    }
+}
+
+///https://rust-lang-nursery.github.io/rust-cookbook/science/mathematics/statistics.html
+pub fn std_deviation(data: &Vec<f64>) -> Option<f64> {
+    match (average(data), data.len()) {
+        (Some(data_mean), count) if count > 0 => {
+            let variance = data
+                .iter()
+                .map(|value| {
+                    let diff = data_mean - (*value);
+
+                    diff * diff
+                })
+                .sum::<f64>()
+                / count as f64;
+
+            Some(variance.sqrt())
+        }
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -90,6 +163,18 @@ mod tests {
     }
 
     #[test]
+    fn test_fft_sine_response_4hz() {
+        let sample_rate: f64 = 25.0;
+        let frequency: f64 = 4.0;
+        let sine = sine_wave(frequency, sample_rate, 100);
+        let output = extract_hr_fft(sine, sample_rate);
+
+        // Simple energy check
+        println!("Freq {}", output);
+        assert!(output == 4.0, "Frequncy not equal to 4.0");
+    }
+
+    #[test]
     fn test_bandpass_sine_response_1_5hz() {
         let sample_rate: f64 = 25.0;
         let frequency: f64 = 1.5;
@@ -127,5 +212,47 @@ mod tests {
             "Filter attenuated too much: {:.2}%",
             100.0 * output_energy / input_energy,
         );
+    }
+
+    #[test]
+    fn test_average_with_multiple_elements() {
+        let nums = vec![1.0, 2.0, 3.0, 4.0];
+        assert_eq!(average(&nums), Some(2.5));
+    }
+
+    #[test]
+    fn test_average_with_single_element() {
+        let nums = vec![42.0];
+        assert_eq!(average(&nums), Some(42.0));
+    }
+
+    #[test]
+    fn test_average_with_empty_vector() {
+        let nums: Vec<f64> = vec![];
+        assert_eq!(average(&nums), None);
+    }
+
+    #[test]
+    fn test_average_with_negative_numbers() {
+        let nums = vec![-1.0, -2.0, -3.0];
+        assert_eq!(average(&nums), Some(-2.0));
+    }
+
+    #[test]
+    fn test_average_with_mixed_sign_numbers() {
+        let nums = vec![-1.0, 0.0, 1.0];
+        assert_eq!(average(&nums), Some(0.0));
+    }
+
+    #[test]
+    fn test_average_with_nan() {
+        let nums = vec![1.0, f64::NAN, 3.0];
+        assert!(average(&nums).unwrap().is_nan());
+    }
+
+    #[test]
+    fn test_average_with_infinity() {
+        let nums = vec![1.0, f64::INFINITY];
+        assert_eq!(average(&nums), Some(f64::INFINITY));
     }
 }

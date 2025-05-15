@@ -14,7 +14,9 @@ flume = "0.10.14"
 once_cell = "1.16.0"
 color-eyre = "0.6.2"
 sci-rs = "0.4.1"
+faer = "0.21"
 biquad = "0.5.0"
+num-complex = "0.4"
 
 [features]
 default = ["nokhwa/default"]

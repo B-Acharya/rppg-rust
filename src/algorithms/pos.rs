@@ -1,5 +1,5 @@
 use super::traits::RppgAlgorithm;
-use super::utils::filterSignal;
+use super::utils::{average, filterSignal, mean_rgb, std_deviation};
 
 pub struct Pos;
 
@@ -97,51 +97,48 @@ impl RppgAlgorithm for Pos {
     }
 }
 
-fn mean_rgb(rgb: &[(f64, f64, f64)]) -> (f64, f64, f64) {
-    let mut red = Vec::new();
-    let mut green = Vec::new();
-    let mut blue = Vec::new();
-    for vals in rgb {
-        red.push(vals.0);
-        green.push(vals.1);
-        blue.push(vals.2);
-    }
+#[cfg(test)]
+mod tests {
+    use super::*; // Bring the items from the outer module into the scope
 
-    let red_mean = average(&red).unwrap();
-    let green_mean = average(&green).unwrap();
-    let blue_mean = average(&blue).unwrap();
+    //#[test]
+    //fn test_green_name() {
+    //    let green_algorithm = Green;
+    //    assert_eq!(green_algorithm.name(), "green");
+    //}
 
-    (red_mean, green_mean, blue_mean)
-}
+    //#[test]
+    //fn test_green_process_empty_frames() {
+    //    let green_algorithm = Green;
+    //    let frames = vec![];
+    //    let mut buffer = vec![];
+    //    green_algorithm.process(&frames, &mut buffer, 25.0, true);
+    //    assert_eq!(buffer.len(), 0);
+    //}
 
-/// Yo this this crazy to implement all the stats functions
-///https://rust-lang-nursery.github.io/rust-cookbook/science/mathematics/statistics.html
-fn average(nums: &Vec<f64>) -> Option<f64> {
-    let sum: f64 = nums.iter().sum();
-    let n = nums.len();
+    //#[test]
+    //fn test_green_process_solid_green_frame() {
+    //    let green_algorithm = Green;
+    //    let rows = 10;
+    //    let cols = 10;
 
-    match n {
-        positive if positive > 0 => Some(sum / n as f64),
-        _ => None,
-    }
-}
+    //    // Create a dummy image (Mat) with all green pixels (BGR format)
+    //    let mut frame = opencv::core::Mat::new_rows_cols_with_default(
+    //        rows,
+    //        cols,
+    //        opencv::core::CV_8UC3,
+    //        opencv::core::Scalar::new(0.0, 255.0, 0.0, 0.0),
+    //    )
+    //    .unwrap();
 
-///https://rust-lang-nursery.github.io/rust-cookbook/science/mathematics/statistics.html
-fn std_deviation(data: &Vec<f64>) -> Option<f64> {
-    match (average(data), data.len()) {
-        (Some(data_mean), count) if count > 0 => {
-            let variance = data
-                .iter()
-                .map(|value| {
-                    let diff = data_mean - (*value as f64);
+    //    let fps = 25.0;
 
-                    diff * diff
-                })
-                .sum::<f64>()
-                / count as f64;
+    //    let frames = vec![frame];
+    //    let mut buffer = vec![0.0; frames.len()]; // Initialize buffer with the correct size
 
-            Some(variance.sqrt())
-        }
-        _ => None,
-    }
+    //    green_algorithm.process(&frames, &mut buffer, fps, false);
+
+    //    assert_eq!(buffer.len(), 1);
+    //    assert_eq!(buffer[0], 255.0, "Expected mean green value to be 255.0");
+    //}
 }
