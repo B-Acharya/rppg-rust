@@ -24,11 +24,6 @@ pub fn filterSignal(signal: Vec<f64>, f0: f64) -> Vec<f64> {
     //need normalized cutoff frequcncies for this to work
     let f_low_normalize: f64 = f_low / (f0 * 0.5);
     let f_high_normalize: f64 = f_high / (f0 * 0.5);
-    // Is this even the right way to to this ?
-    let f_center = (f_low * f_high).sqrt(); // Geometric mean
-                                            // 1.341640
-    let bandwidth = f_high - f_low; // Hz
-    let q = f_center / bandwidth;
 
     println!("{}", f0);
 
