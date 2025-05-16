@@ -2,6 +2,20 @@ use biquad::Biquad;
 use biquad::{Coefficients, DirectForm1, Type};
 use rustfft::{num_complex::Complex, FftPlanner};
 
+use textplots::{Chart, Plot, Shape};
+
+pub fn plot_signal(signal: &Vec<f32>) {
+    let data: Vec<(f32, f32)> = signal
+        .iter()
+        .enumerate()
+        .map(|(i, &x)| (i as f32, x))
+        .collect();
+
+    Chart::new(80, 20, 0.0, signal.len() as f32)
+        .lineplot(&Shape::Lines(&data))
+        .display();
+}
+
 pub fn filterSignal(signal: Vec<f64>, f0: f64) -> Vec<f64> {
     // Cutoff and sampling frequencies
     let f_low: f64 = 0.6;
@@ -53,7 +67,7 @@ pub fn extract_hr_fft(signal: &mut Vec<f64>, sampling_rate: f64) -> f64 {
         .unwrap();
 
     let freq_resolution = sampling_rate / n as f64;
-    max_index as f64 * freq_resolution
+    max_index as f64 * freq_resolution * 60.0
 }
 
 pub fn mean_rgb(rgb: &[(f64, f64, f64)]) -> (f64, f64, f64) {

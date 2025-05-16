@@ -1,6 +1,6 @@
 use super::traits::RppgAlgorithm;
 use super::utils::extract_hr_fft;
-use super::utils::{average, filterSignal, mean_rgb, std_deviation};
+use super::utils::{average, filterSignal, mean_rgb, plot_signal, std_deviation};
 
 pub struct Pos;
 
@@ -41,7 +41,6 @@ impl RppgAlgorithm for Pos {
                 continue;
             }
             let m = n_i - l;
-            //normalize
 
             let rbg_slice = &&rbg[m..n_i];
             let temporal_mean_channels = mean_rgb(rbg_slice);
@@ -107,6 +106,9 @@ impl RppgAlgorithm for Pos {
         filter_signal: bool,
     ) -> f64 {
         self.process(frames, buffer, fps, filter_signal);
+        let singal_for_plot = buffer.clone();
+        let signal_for_plot_32 = singal_for_plot.iter().map(|x| *x as f32).collect();
+        plot_signal(&signal_for_plot_32);
         extract_hr_fft(buffer, fps)
     }
 }

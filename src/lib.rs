@@ -23,7 +23,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let hr = rppgalgorithm.extract_hr(&frames.0, &mut signal_buffer, frames.1, filter_signal);
 
     println! {"{}",frame_length};
-    println! {"{:?}",signal_buffer};
+    //println! {"{:?}",signal_buffer};
     println! {"{:?}",hr };
 
     Ok(())

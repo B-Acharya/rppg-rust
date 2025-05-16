@@ -17,6 +17,7 @@ sci-rs = "0.4.1"
 faer = "0.21"
 biquad = "0.5.0"
 num-complex = "0.4"
+textplots = "0.8"
 
 [features]
 default = ["nokhwa/default"]

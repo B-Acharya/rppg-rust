@@ -1,6 +1,7 @@
 use super::traits::RppgAlgorithm;
 use super::utils::extract_hr_fft;
 use super::utils::filterSignal;
+use super::utils::plot_signal;
 
 pub struct Green;
 
@@ -52,6 +53,9 @@ impl RppgAlgorithm for Green {
         filter_signal: bool,
     ) -> f64 {
         self.process(frames, buffer, fps, filter_signal);
+        let singal_for_plot = buffer.clone();
+        let signal_for_plot_32 = singal_for_plot.iter().map(|x| *x as f32).collect();
+        plot_signal(&signal_for_plot_32);
         extract_hr_fft(buffer, fps)
     }
 }
