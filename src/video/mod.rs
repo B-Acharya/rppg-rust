@@ -1,6 +1,6 @@
-mod opencv_backend;
-mod traits;
-mod video_rs_backend;
+pub mod opencv_backend;
+pub mod traits;
+pub mod video_rs_backend;
 
-pub use opencv_backend::opencvCvBackend;
+pub use opencv_backend::OpencvCvBackend;
 pub use video_rs_backend::VideoRsBackend;

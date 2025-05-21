@@ -1,5 +1,5 @@
-use types::Frame;
+use ndarray::Array3;
 
 pub trait VideoBackend {
-    pub fn get_frames(path: &str) -> opencv::Result<(Vec<Frame>, f64), String>;
+    fn get_frames_fps(&self, path: &str) -> opencv::Result<(Vec<Array3<f64>>, f64), String>;
 }

@@ -1,17 +1,15 @@
 use super::traits::VideoBackend;
-pub struct opencvCvBackend;
-use crate::types::Frame;
-use ndarray::ArrayView3;
+use ndarray::{Array3, ArrayView3};
 use opencv::{
     core::{MatTraitConst, MatTraitConstManual},
-    videoio::{VideoCapture, CAP_ANY},
+    videoio::{VideoCapture, VideoCaptureTrait, VideoCaptureTraitConst, CAP_ANY},
 };
 
-impl VideoBackend for opencvCvBackend {
-    pub fn get_frames(path: &str) -> Result<(Vec<Frame>, f64), String> {
-        let mut frames: Vec<Frame> = Vec::new();
+pub struct OpencvCvBackend;
 
-        //TODO: Convert opencvframe to Frame struct
+impl VideoBackend for OpencvCvBackend {
+    fn get_frames_fps(&self, path: &str) -> Result<(Vec<Array3<f64>>, f64), String> {
+        let mut frames = Vec::new();
 
         let mut cam = VideoCapture::from_file(path, CAP_ANY).unwrap();
 
@@ -24,28 +22,29 @@ impl VideoBackend for opencvCvBackend {
             match cam.read(&mut frame) {
                 Ok(true) => {
                     if frame.empty() {
-                        eprintln!("Frame not found");
+                        eprintln!("Array3 not found");
                         break;
                     }
                     if !frame.is_continuous() {
-                        eprintln!("Frame not stored in continous memmory");
+                        eprintln!("Array3 not stored in continous memmory");
                         break;
                     }
 
-                    let mut frame_f32 = opencv::core::Mat::defualt();
+                    let mut frame_f64 = opencv::core::Mat::default();
                     frame
-                        .convert_to(frame_f32, opencv::core::CV_32FC3, 1.0 / 255.0, 0.0)
+                        .convert_to(&mut frame_f64, opencv::core::CV_64FC3, 1.0 / 255.0, 0.0)
                         .unwrap();
 
-                    let shape = frame_f32.size().unwrap();
-
+                    // Conversion of opencv::core::MAT to ArrayView3
+                    let size = frame_f64.size().unwrap();
                     let h = size.height as usize;
                     let w = size.width as usize;
-                    let channels = mat.channels().unwrap() as usize;
+                    let channels = frame_f64.channels() as usize;
 
-                    let data = frame.data_bytes();
-                    let temp_array = ArrayView3::from_shape((h, w, channels), data);
-                    frames.push(temp_array);
+                    //How are images stroed that this makes sense ?
+                    let data = frame_f64.data_typed::<f64>().unwrap();
+                    let temp_array = ArrayView3::<f64>::from_shape((h, w, channels), data).unwrap();
+                    frames.push(temp_array.into_owned());
                 }
                 Ok(false) => {
                     println!("No more frames!");
@@ -60,6 +59,6 @@ impl VideoBackend for opencvCvBackend {
         }
 
         let fps = cam.get(opencv::videoio::CAP_PROP_FPS).unwrap();
-        Ok((frames, fps))
+        Ok((frames, fps.into()))
     }
 }
