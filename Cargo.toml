@@ -5,8 +5,8 @@ authors = ["Bhargav Acharya <bacharya@techfak.uni-bielefeld.de>"]
 edition = "2021"
 
 [dependencies]
-opencv = "0.94.4"
-ndarray = "0.15"
+opencv = {version = "0.94.4" ,features = ["clang-runtime"] }
+ndarray = "0.16.1"
 rustfft = "6.1"
 log = "0.4"
 env_logger = "0.10"
@@ -18,6 +18,7 @@ faer = "0.21"
 biquad = "0.5.0"
 num-complex = "0.4"
 textplots = "0.8"
+video-rs = { version = "0.10", features = ["ndarray"] }
 
 [features]
 default = ["nokhwa/default"]
