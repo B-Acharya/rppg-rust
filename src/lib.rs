@@ -1,30 +1,42 @@
 use std::error::Error;
 use std::process;
 
-pub mod algorithms;
+use video::traits::VideoBackend;
+
+pub mod pipeline;
+pub mod rppg_algorithms;
+pub mod rppg_types;
 pub mod video;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    // TODO: Implement algorithms
-    let rppgalgorithm = algorithms::get_algorithm(&config.algorithm);
+    let rppgalgorithm = rppg_algorithms::get_algorithm(&config.algorithm);
 
-    let frames = video::get_frames(&config.video_path).unwrap_or_else(|err| {
-        eprintln!("Problems parsing the input:{err} ");
-        process::exit(1);
-    });
+    let backend = video::opencv_backend::OpencvCvBackend;
+    let frames_fps = backend
+        .get_frames_fps(&config.video_path)
+        .unwrap_or_else(|err| {
+            eprintln!("Problems parsing the input:{err} ");
+            process::exit(1);
+        });
 
-    let frame_length = frames.0.len();
+    let frame_length = frames_fps.0.len();
     let mut signal_buffer: Vec<f64> = vec![0.0; frame_length];
     let filter_signal = true;
 
-    // how should you design this function ? It should pass botha mutalable reference so that
-    // there's less data that is transfered to the funciton, but then what should be returend ?
+    //// how should you design this function ? It should pass botha mutalable reference so that
+    //// there's less data that is transfered to the funciton, but then what should be returend ?
     //rppgalgorithm.process(&frames.0, &mut signal_buffer, frames.1, filter_signal);
-    let hr = rppgalgorithm.extract_hr(&frames.0, &mut signal_buffer, frames.1, filter_signal);
+    //rppgalgorithm.(&frames.0, &mut signal_buffer, frames.1, filter_signal);
+    let hr = rppgalgorithm.extract_hr(
+        &frames_fps.0,
+        &mut signal_buffer,
+        frames_fps.1,
+        filter_signal,
+    );
 
-    println! {"{}",frame_length};
-    //println! {"{:?}",signal_buffer};
-    println! {"{:?}",hr };
+    //println! {"{}",frame_length};
+    ////println! {"{:?}",signal_buffer};
+    //println! {"{:?}",hr };
 
     Ok(())
 }
