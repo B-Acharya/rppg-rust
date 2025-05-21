@@ -1,9 +1,8 @@
 use super::traits::RppgAlgorithm;
 use super::utils::extract_hr_fft;
-use super::utils::filterSignal;
 use super::utils::plot_signal;
 use ndarray::s;
-use ndarray::Array3;
+use ndarray::{Array, Array3};
 
 pub struct Green;
 
@@ -12,14 +11,7 @@ impl RppgAlgorithm for Green {
         "green"
     }
 
-    fn process(
-        &self,
-        frames: &Vec<Array3<f64>>,
-        buffer: &mut Vec<f64>,
-        fps: f64,
-        filter_singal: bool,
-    ) {
-        let dummy_mask = opencv::core::no_array();
+    fn process(&self, frames: &Vec<Array3<f64>>, buffer: &mut Vec<f64>) {
         let dummy: Vec<f64> = frames
             .iter()
             .map(|frame| {
@@ -30,13 +22,7 @@ impl RppgAlgorithm for Green {
             .collect();
 
         buffer.clear();
-
-        if filter_singal {
-            let filtered_singal = filterSignal(dummy, fps);
-            buffer.extend(filtered_singal);
-        } else {
-            buffer.extend(dummy);
-        }
+        buffer.extend(dummy);
     }
 
     fn extract_hr(
@@ -46,67 +32,46 @@ impl RppgAlgorithm for Green {
         fps: f64,
         filter_signal: bool,
     ) -> f64 {
-        self.process(frames, buffer, fps, filter_signal);
-        let singal_for_plot = buffer.clone();
-        let signal_for_plot_32 = singal_for_plot.iter().map(|x| *x as f32).collect();
+        self.process(frames, buffer);
+        let signal_to_filter = buffer.clone();
+        let filtered_signal = self.filter_signal(signal_to_filter, fps);
+        let signal_for_plot_32 = filtered_signal.iter().map(|x| *x as f32).collect();
         plot_signal(&signal_for_plot_32);
         extract_hr_fft(buffer, fps)
     }
-}
 
-impl Green {
-    fn process_ndarary(
-        &self,
-        frames: &Vec<Array3<f64>>,
-        buffer: &mut Vec<f64>,
-        fps: f64,
-        filter_singal: bool,
-    ) {
+    fn process_filter(&self, frames: &Vec<Array3<f64>>, buffer: &mut Vec<f64>, fps: f64) {
+        self.process(frames, buffer);
+        let signal_to_filter = buffer.clone();
+        let filtered_singal = self.filter_signal(signal_to_filter, fps);
+        buffer.extend(filtered_singal);
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*; // Bring the items from the outer module into the scope
+    use super::*;
 
     #[test]
-    fn test_green_name() {
-        let green_algorithm = Green;
-        assert_eq!(green_algorithm.name(), "green");
-    }
+    fn test_green_process_simple() {
+        let algo = Green {};
 
-    #[test]
-    fn test_green_process_empty_frames() {
-        let green_algorithm = Green;
-        let frames = vec![];
+        // Create a 2x2 RGB frame with blue channel (index 2) = 50.0
+        let frame = Array::from_shape_fn((2, 2, 3), |(_, _, c)| match c {
+            0 => 0.0,  // Red
+            1 => 0.0,  // Blue
+            2 => 50.0, // Green
+            _ => 0.0,
+        });
+
+        let frames = vec![frame.clone(), frame.clone()];
         let mut buffer = vec![];
-        green_algorithm.process(&frames, &mut buffer, 25.0, true);
-        assert_eq!(buffer.len(), 0);
-    }
 
-    #[test]
-    fn test_green_process_solid_green_frame() {
-        let green_algorithm = Green;
-        let rows = 10;
-        let cols = 10;
+        algo.process(&frames, &mut buffer);
 
-        // Create a dummy image (Mat) with all green pixels (BGR format)
-        let mut frame = opencv::core::Mat::new_rows_cols_with_default(
-            rows,
-            cols,
-            opencv::core::CV_8UC3,
-            opencv::core::Scalar::new(0.0, 255.0, 0.0, 0.0),
-        )
-        .unwrap();
-
-        let fps = 25.0;
-
-        let frames = vec![frame];
-        let mut buffer = vec![0.0; frames.len()]; // Initialize buffer with the correct size
-
-        green_algorithm.process(&frames, &mut buffer, fps, false);
-
-        assert_eq!(buffer.len(), 1);
-        assert_eq!(buffer[0], 255.0, "Expected mean green value to be 255.0");
+        assert_eq!(buffer.len(), 2);
+        for value in buffer {
+            assert_eq!(value, 50.0); // Mean of 2x2 pixels each 50.0 = 50.0
+        }
     }
 }

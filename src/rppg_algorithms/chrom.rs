@@ -9,13 +9,7 @@ impl RppgAlgorithm for Chrom {
         "CHROM"
     }
 
-    fn process(
-        &self,
-        frames: &Vec<Array3<f64>>,
-        buffer: &mut Vec<f64>,
-        fps: f64,
-        filter_singal: bool,
-    ) {
+    fn process(&self, frames: &Vec<Array3<f64>>, buffer: &mut Vec<f64>) {
         // Dummy logic
     }
 
@@ -26,7 +20,14 @@ impl RppgAlgorithm for Chrom {
         fps: f64,
         filter_signal: bool,
     ) -> f64 {
-        self.process(frames, buffer, fps, filter_signal);
+        self.process(frames, buffer);
         extract_hr_fft(buffer, fps)
+    }
+
+    fn process_filter(&self, frames: &Vec<Array3<f64>>, buffer: &mut Vec<f64>, fps: f64) {
+        self.process(frames, buffer);
+        let signal_to_filter = buffer.clone();
+        let filtered_singal = self.filter_signal(signal_to_filter, fps);
+        buffer.extend(filtered_singal);
     }
 }
