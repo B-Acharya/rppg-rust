@@ -25,7 +25,10 @@ jobs:
           libavutil-dev \
           libavformat-dev \
           libavcodec-dev \
-          pkg-config
+          libopencv-dev \
+          ffmpeg \
+          pkg-config \
+          build-essential
 
     - name: Build
       run: cargo build --verbose
