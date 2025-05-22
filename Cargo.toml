@@ -20,8 +20,6 @@ num-complex = "0.4"
 textplots = "0.8"
 video-rs = { version = "0.10", features = ["ndarray"] }
 
-[features]
-default = ["nokhwa/default"]
 
 
 [dependencies.ggez]
@@ -31,6 +29,7 @@ default-features = false
 [dependencies.clap]
 version = "4.0.20"
 features = ["derive"]
+
 
 [dependencies.image]
 version = "0.24.5"
