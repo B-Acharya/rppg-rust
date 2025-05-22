@@ -62,7 +62,8 @@ pub fn extract_hr_fft(signal: &mut Vec<f64>, sampling_rate: f64) -> f64 {
         .unwrap();
 
     let freq_resolution = sampling_rate / n as f64;
-    max_index as f64 * freq_resolution * 60.0
+    //max_index as f64 * freq_resolution * 60.0
+    max_index as f64 * freq_resolution
 }
 
 pub fn mean_rgb(rgb: &[(f64, f64, f64)]) -> (f64, f64, f64) {

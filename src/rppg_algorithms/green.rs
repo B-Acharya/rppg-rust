@@ -37,7 +37,9 @@ impl RppgAlgorithm for Green {
         let filtered_signal = self.filter_signal(signal_to_filter, fps);
         let signal_for_plot_32 = filtered_signal.iter().map(|x| *x as f32).collect();
         plot_signal(&signal_for_plot_32);
-        extract_hr_fft(buffer, fps)
+        let hz = extract_hr_fft(buffer, fps);
+        // convert to BPM
+        hz * 60.0
     }
 
     fn process_filter(&self, frames: &Vec<Array3<f64>>, buffer: &mut Vec<f64>, fps: f64) {
